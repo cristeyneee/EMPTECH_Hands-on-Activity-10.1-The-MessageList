@@ -1,7 +1,7 @@
-// App.js
 import React from 'react';
-import { StyleSheet, View, Alert, Image, TouchableHighlight, BackHandler } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 import Status from './components/Status';
 import MessageList from './components/MessageList';
 import {
@@ -21,70 +21,18 @@ export default class App extends React.Component {
         longitude: -122.4324,
       }),
     ],
-    fullscreenImageId: null,
   };
 
-  componentDidMount() {
-    this.backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      const { fullscreenImageId } = this.state;
-      if (fullscreenImageId) {
-        this.dismissFullscreenImage();
-        return true;
-      }
-      return false;
-    });
-  }
-
-  componentWillUnmount() {
-    this.backHandler.remove();
-  }
-
-  handlePressMessage = (item) => {
-    const { id, type } = item;
-    if (type === 'text') {
-      Alert.alert('Delete message?', 'Do you want to delete this message?', [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            this.setState(prev => ({
-              messages: prev.messages.filter(msg => msg.id !== id),
-            }));
-          },
-        },
-      ]);
-    } else if (type === 'image') {
-      this.setState({ fullscreenImageId: id });
-    }
-  };
-
-  dismissFullscreenImage = () => {
-    this.setState({ fullscreenImageId: null });
-  };
-
-  renderFullscreenImage = () => {
-    const { messages, fullscreenImageId } = this.state;
-    if (!fullscreenImageId) return null;
-
-    const image = messages.find(msg => msg.id === fullscreenImageId);
-    if (!image) return null;
-
-    return (
-      <TouchableHighlight
-        style={styles.fullscreenOverlay}
-        onPress={this.dismissFullscreenImage}
-      >
-        <Image style={styles.fullscreenImage} source={{ uri: image.uri }} />
-      </TouchableHighlight>
-    );
-  };
+  handlePressMessage = () => {};
 
   renderMessageList() {
     const { messages } = this.state;
     return (
       <View style={styles.messageListContainer}>
-        <MessageList messages={messages} onPressMessage={this.handlePressMessage} />
+        <MessageList
+          messages={messages}
+          onPressMessage={this.handlePressMessage}
+        />
       </View>
     );
   }
@@ -92,30 +40,40 @@ export default class App extends React.Component {
   render() {
     return (
       <SafeAreaView style={styles.container}>
+        {/* STATUS AREA */}
         <Status />
+
+        {/* MESSAGE LIST AREA */}
         {this.renderMessageList()}
+
+        {/* TOOLBAR AREA (blank white space) */}
         <View style={styles.toolbar} />
+
+        {/* INPUT METHOD EDITOR AREA (blank white space) */}
         <View style={styles.inputMethodEditor} />
-        {this.renderFullscreenImage()}
       </SafeAreaView>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white' },
-  messageListContainer: { flex: 2.5, marginBottom: 40 },
-  toolbar: { flex: 0.4, backgroundColor: 'white' },
-  inputMethodEditor: { flex: 0.9, backgroundColor: 'white' },
-  fullscreenOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
   },
-  fullscreenImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
+  // Main message area
+  messageListContainer: {
+    flex: 2.5,
+    marginBottom: 40, // space before IME
+  },
+  // Blank toolbar area
+  toolbar: {
+    flex: 0.4,
+    backgroundColor: 'white',
+  },
+  // Blank IME area
+  inputMethodEditor: {
+    flex: 0.9,
+    backgroundColor: 'white',
   },
 });
